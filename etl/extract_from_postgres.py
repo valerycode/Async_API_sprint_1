@@ -7,7 +7,7 @@ from backoff import backoff
 from config import etl_settings, pg_settings
 from psycopg2 import DatabaseError, OperationalError, ProgrammingError
 from psycopg2.extras import RealDictCursor
-from queries import FILMWORKS_QUERY
+from etl.queries.movies import FILMWORKS_QUERY
 
 logger = logging.getLogger(__name__)
 
