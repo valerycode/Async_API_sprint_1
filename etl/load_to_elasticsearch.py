@@ -12,7 +12,7 @@ from elasticsearch import (
     TransportError,
 )
 from elasticsearch.helpers import bulk
-from etl.indexes.es_index import MOVIES_INDEX
+from etl.indexes.movies import MOVIES_INDEX
 
 from etl.models import ESFilmworkData
 
