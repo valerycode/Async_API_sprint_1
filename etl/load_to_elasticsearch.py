@@ -13,6 +13,7 @@ from elasticsearch import (
 )
 from elasticsearch.helpers import bulk
 from etl.indexes.movies import MOVIES_INDEX
+from etl.indexes.genres import GENRES_INDEX
 
 from etl.models import ESFilmworkData
 
@@ -22,6 +23,7 @@ INDEX_CREATED = (
     "Index {name} is created." " Response from Elasticsearch: {response}."
 )
 PING_MESSAGE = "Ping from Elasticsearch server: {message}."
+INDEXES = {'movies': MOVIES_INDEX, 'genres': GENRES_INDEX}
 
 
 class ElasticsearchLoader:
@@ -39,21 +41,28 @@ class ElasticsearchLoader:
         logging.info(PING_MESSAGE.format(message=self.client.ping()))
 
     @backoff(exceptions=(RequestError,), logger=logger)
-    def create_index(self) -> None:
-        if not self.client.indices.exists(index="movies"):
-            response = self.client.indices.create(
-                index="movies",
-                ignore=HTTPStatus.BAD_REQUEST.value,
-                body=MOVIES_INDEX,
-            )
-            logger.debug(
-                INDEX_CREATED.format(name="movies", response=response)
-            )
+    def create_indexes(self) -> None:
+        for index in INDEXES:
+            if not self.client.indices.exists(index=index):
+                response = self.client.indices.create(
+                    index=index,
+                    ignore=HTTPStatus.BAD_REQUEST.value,
+                    body=INDEXES[index],
+                )
+                logger.debug(
+                    INDEX_CREATED.format(name=index, response=response)
+                )
 
     @backoff(exceptions=(SerializationError,), logger=logger)
-    def load_data_to_elastic(self, data: list[ESFilmworkData]) -> None:
+    def load_films_to_elastic(self, data: list[ESFilmworkData]) -> None:
         documents = [
             {"_index": "movies", "_id": row.id, "_source": row.dict()}
             for row in data
         ]
         bulk(self.client, documents)
+
+    def load_genres_to_elastic(self):
+        pass
+
+    def load_persons_to_elastic(self):
+        pass
