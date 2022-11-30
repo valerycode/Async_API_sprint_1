@@ -50,3 +50,12 @@ def get_hits(docs: Optional[dict], schema: Schemas):
     parse_data = parse_obj_as(list[schema], data)
     return parse_data
 
+
+def create_hash_key(index: str, params: str) -> str:
+    """
+    :param index: индекс в elasticsearch
+    :param params: параметры запроса
+    :return: хешированый ключ в md5
+    """
+    hash_key = hashlib.md5(params.encode()).hexdigest()
+    return f"{index}:{hash_key}"
