@@ -5,6 +5,9 @@ from time import sleep
 from config import etl_settings
 from extract_from_postgres import PostgresExtractor
 from load_to_elasticsearch import ElasticsearchLoader
+from queries.films import FILMWORKS_QUERY
+from queries.genres import GENRE_QUERY
+from queries.persons import PERSON_QUERY
 from state import JsonFileStorage, State
 from transform_data import DataTransform
 
@@ -19,6 +22,11 @@ logger = logging.getLogger(__name__)
 
 LOAD_MESSAGE = "Load in Elasticsearch {number} documents."
 ERROR_MESSAGE = "ETL process failed. Error occurs: {error}."
+INDEXES_QUERIES = {
+    "movies": FILMWORKS_QUERY,
+    "genres": GENRE_QUERY,
+    "persons": PERSON_QUERY,
+}
 
 
 class ETL:
@@ -28,17 +36,21 @@ class ETL:
         self.transform = DataTransform()
         self.state = State(JsonFileStorage(etl_settings.STATE_FILE_NAME))
 
-    def load_data_from_postgres_to_elastic(self):
+    def load_data_from_postgres_to_elastic(self, index: str):
         """Load data from Postgres to Elasticsearch"""
-        last_modified = self.state.get_state("modified")
+        last_modified = self.state.get_state(f"{index}_modified")
         date_last_modified = last_modified if last_modified else datetime.min
-        count = 0
-        for films in self.postgres.extract_movies(date_last_modified):
-            self.state.set_state("modified", datetime.now().isoformat())
-            es_films = self.transform.validate_and_transform_data(films)
-            self.elastic.load_data_to_elastic(es_films)
-            count += len(films)
-            logger.debug(LOAD_MESSAGE.format(number=count))
+        objects_number = 0
+        for data in self.postgres.extract_data_from_pg(
+            date_last_modified, index
+        ):
+            self.state.set_state(
+                f"{index}_modified", datetime.now().isoformat()
+            )
+            es_data = self.transform.transform_and_validate_data(data, index)
+            self.elastic.load_data_to_elastic(es_data, index)
+            objects_number += len(es_data)
+            logger.debug(LOAD_MESSAGE.format(number=objects_number))
 
 
 def main():
@@ -47,8 +59,9 @@ def main():
         try:
             etl.postgres.connect_to_postgres()
             etl.elastic.connect()
-            etl.elastic.create_index()
-            etl.load_data_from_postgres_to_elastic()
+            for index_name in INDEXES_QUERIES:
+                etl.elastic.create_index(index_name)
+                etl.load_data_from_postgres_to_elastic(index_name)
         except Exception as error:
             logger.error(ERROR_MESSAGE.format(error=error))
         finally:

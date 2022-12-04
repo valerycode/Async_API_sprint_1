@@ -4,11 +4,10 @@ from typing import Optional
 
 import orjson
 from aioredis import Redis
-from elasticsearch import AsyncElasticsearch
-from fastapi import Depends, HTTPException
-
 from db.elastic import get_elastic
 from db.redis import get_redis
+from elasticsearch import AsyncElasticsearch
+from fastapi import Depends, HTTPException
 from models.film import ESFilm, ListResponseFilm
 from models.person import DetailResponsePerson, ElasticPerson
 from services.mixins import ServiceMixin
@@ -28,7 +27,9 @@ class PersonService(ServiceMixin):
         self.person_films = value
 
     async def get_person(self, person_id: str):
-        person = await self.get_by_id(target_id=person_id, schema=ElasticPerson)
+        person = await self.get_by_id(
+            target_id=person_id, schema=ElasticPerson
+        )
         if not person:
             """Если персона не найдена, отдаём 404 статус"""
             raise HTTPException(
@@ -63,14 +64,17 @@ class PersonService(ServiceMixin):
             """ Прогоняем данные через pydantic """
             person_films: list[ListResponseFilm] = [
                 ListResponseFilm(
-                    uuid=film.id, title=film.title, imdb_rating=film.imdb_rating
+                    uuid=film.id,
+                    title=film.title,
+                    imdb_rating=film.imdb_rating,
                 )
                 for film in hits
             ]
             data = orjson.dumps([i.dict() for i in person_films])
             new_param: str = f"{total}{page}{body}{page_size}"
             await self._put_data_to_cache(
-                key=create_hash_key(index=state_key, params=new_param), instance=data
+                key=create_hash_key(index=state_key, params=new_param),
+                instance=data,
             )
             """ Сохраняем число персон в стейт """
             await self.set_person_films_count(value=total)
@@ -129,7 +133,8 @@ class PersonService(ServiceMixin):
             data = orjson.dumps([i.dict() for i in persons])
             new_param: str = f"{total}{page}{body}{page_size}"
             await self._put_data_to_cache(
-                key=create_hash_key(index=self.index, params=new_param), instance=data
+                key=create_hash_key(index=self.index, params=new_param),
+                instance=data,
             )
             """ Сохраняем число персон в стейт """
             await self.set_total_count(value=total)

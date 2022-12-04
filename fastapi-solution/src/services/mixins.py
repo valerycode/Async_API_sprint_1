@@ -1,9 +1,8 @@
 from typing import Optional, Union
 
 from aioredis import Redis
-from elasticsearch import AsyncElasticsearch, NotFoundError
-
 from core.config import CACHE_EXPIRE_IN_SECONDS
+from elasticsearch import AsyncElasticsearch, NotFoundError
 from models.film import ESFilm
 from models.genre import ElasticGenre
 from models.person import ElasticPerson
@@ -42,7 +41,9 @@ class ServiceMixin:
         except NotFoundError:
             return None
 
-    async def get_by_id(self, target_id: str, schema: Schemas) -> Optional[ES_schemas]:
+    async def get_by_id(
+        self, target_id: str, schema: Schemas
+    ) -> Optional[ES_schemas]:
         """Пытаемся получить данные из кеша, потому что оно работает быстрее"""
         instance = await self._get_result_from_cache(key=target_id)
         if not instance:
@@ -53,7 +54,9 @@ class ServiceMixin:
             if not instance:
                 return None
             """ Сохраняем фильм в кеш """
-            await self._put_data_to_cache(key=instance.id, instance=instance.json())
+            await self._put_data_to_cache(
+                key=instance.id, instance=instance.json()
+            )
             return instance
         return schema.parse_raw(instance)
 
@@ -72,6 +75,10 @@ class ServiceMixin:
         data = await self.redis.get(key=key)
         return data or None
 
-    async def _put_data_to_cache(self, key: str, instance: Union[bytes, str]) -> None:
+    async def _put_data_to_cache(
+        self, key: str, instance: Union[bytes, str]
+    ) -> None:
         """Сохраняем данные об объекте в кеш, время жизни кеша — 5 минут"""
-        await self.redis.set(key=key, value=instance, expire=CACHE_EXPIRE_IN_SECONDS)
+        await self.redis.set(
+            key=key, value=instance, expire=CACHE_EXPIRE_IN_SECONDS
+        )

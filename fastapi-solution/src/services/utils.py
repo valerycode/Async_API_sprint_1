@@ -2,7 +2,6 @@ import hashlib
 from typing import Optional
 
 from pydantic import parse_obj_as
-
 from services.mixins import Schemas
 
 
@@ -25,7 +24,11 @@ def get_params_films_to_elastic(
             "from": (page - 1) * page_size,
             "query": {
                 "bool": {
-                    "must": {"match": {"title": {"query": query, "fuzziness": "auto"}}},
+                    "must": {
+                        "match": {
+                            "title": {"query": query, "fuzziness": "auto"}
+                        }
+                    },
                     "filter": genre_search,
                 }
             },
