@@ -1,4 +1,4 @@
-PERSON_QUERY = '''
+PERSON_QUERY = """
 SELECT
     p.id,
     p.full_name,
@@ -20,4 +20,4 @@ LEFT JOIN content.person_film_work pfw ON pfw.person_id = p.id
 LEFT JOIN content.film_work fw ON fw.id = pfw.film_work_id
 WHERE p.modified > %s
 GROUP BY p.id
-ORDER BY p.modified'''
+ORDER BY p.modified"""

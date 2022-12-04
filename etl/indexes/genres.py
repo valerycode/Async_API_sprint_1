@@ -7,10 +7,7 @@ GENRES_INDEX_BODY: dict = {
         "properties": {
             "id": {"type": "keyword"},
             "name": {"type": "keyword"},
-            "description": {
-                "type": "text",
-                "analyzer": "ru_en"
-            }
-            },
+            "description": {"type": "text", "analyzer": "ru_en"},
         },
-    }
+    },
+}

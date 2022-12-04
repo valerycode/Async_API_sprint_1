@@ -6,8 +6,8 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
-FILE_NOT_FOUND = 'File {name} is not found. Error occurs: {error}.'
-READ_ERROR = 'File {name} can not be read. Error occurs: {error}.'
+FILE_NOT_FOUND = "File {name} is not found. Error occurs: {error}."
+READ_ERROR = "File {name} can not be read. Error occurs: {error}."
 
 
 class BaseStorage:

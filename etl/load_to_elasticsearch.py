@@ -13,11 +13,11 @@ from elasticsearch import (
     TransportError,
 )
 from elasticsearch.helpers import bulk
+from indexes.genres import GENRES_INDEX_BODY
+from indexes.movies import MOVIES_INDEX_BODY
+from indexes.persons import PERSONS_INDEX_BODY
 
 from etl.models import ESFilmworkData, ESGenre, ESPerson
-from indexes.movies import MOVIES_INDEX_BODY
-from indexes.genres import GENRES_INDEX_BODY
-from indexes.persons import PERSONS_INDEX_BODY
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ PING_MESSAGE = "Ping from Elasticsearch server: {message}."
 INDEXES_BODY = {
     "movies": MOVIES_INDEX_BODY,
     "genres": GENRES_INDEX_BODY,
-    "persons": PERSONS_INDEX_BODY
+    "persons": PERSONS_INDEX_BODY,
 }
 
 
@@ -54,17 +54,12 @@ class ElasticsearchLoader:
                 ignore=HTTPStatus.BAD_REQUEST.value,
                 body=INDEXES_BODY[index],
             )
-            logger.debug(
-                INDEX_CREATED.format(name=index, response=response)
-            )
+            logger.debug(INDEX_CREATED.format(name=index, response=response))
 
     @backoff(exceptions=(SerializationError,), logger=logger)
     def load_data_to_elastic(
-            self, data: list[Union[
-                ESFilmworkData,
-                ESGenre,
-                ESPerson]
-            ], index: str) -> None:
+        self, data: list[Union[ESFilmworkData, ESGenre, ESPerson]], index: str
+    ) -> None:
         documents = [
             {"_index": index, "_id": row.id, "_source": row.dict()}
             for row in data

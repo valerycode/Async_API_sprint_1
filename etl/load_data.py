@@ -5,11 +5,11 @@ from time import sleep
 from config import etl_settings
 from extract_from_postgres import PostgresExtractor
 from load_to_elasticsearch import ElasticsearchLoader
-from state import JsonFileStorage, State
-from transform_data import DataTransform
 from queries.films import FILMWORKS_QUERY
 from queries.genres import GENRE_QUERY
 from queries.persons import PERSON_QUERY
+from state import JsonFileStorage, State
+from transform_data import DataTransform
 
 logging.basicConfig(
     level=etl_settings.LOGGING_LEVEL,
@@ -25,7 +25,7 @@ ERROR_MESSAGE = "ETL process failed. Error occurs: {error}."
 INDEXES_QUERIES = {
     "movies": FILMWORKS_QUERY,
     "genres": GENRE_QUERY,
-    "persons": PERSON_QUERY
+    "persons": PERSON_QUERY,
 }
 
 
@@ -42,10 +42,10 @@ class ETL:
         date_last_modified = last_modified if last_modified else datetime.min
         objects_number = 0
         for data in self.postgres.extract_data_from_pg(
-                date_last_modified, index):
+            date_last_modified, index
+        ):
             self.state.set_state(
-                f"{index}_modified",
-                datetime.now().isoformat()
+                f"{index}_modified", datetime.now().isoformat()
             )
             es_data = self.transform.transform_and_validate_data(data, index)
             self.elastic.load_data_to_elastic(es_data, index)

@@ -2,7 +2,7 @@ import logging
 from typing import Iterator, Union
 
 from backoff import backoff
-from models import ESFilmworkData, ESPerson, ESGenre
+from models import ESFilmworkData, ESGenre, ESPerson
 from pydantic import ValidationError
 
 logger = logging.getLogger(__name__)
@@ -18,8 +18,7 @@ class DataTransform:
         persons_by_role = {}
         for role in self.roles:
             names_and_ids = [
-                {"id": field["person_id"],
-                 "full_name": field["person_name"]}
+                {"id": field["person_id"], "full_name": field["person_name"]}
                 for field in persons
                 if field["person_role"] == role
             ]
@@ -28,13 +27,15 @@ class DataTransform:
         return persons_by_role
 
     @backoff((ValidationError,), logger=logger)
-    def transform_and_validate_data(self, data: Iterator, index: str) -> \
-            list[Union[ESFilmworkData, ESGenre, ESPerson]]:
+    def transform_and_validate_data(
+        self, data: Iterator, index: str
+    ) -> list[Union[ESFilmworkData, ESGenre, ESPerson]]:
         es_objects = []
-        if index == 'movies':
+        if index == "movies":
             for film in data:
                 film_persons = self.extract_names_and_ids_by_role(
-                    film["persons"])
+                    film["persons"]
+                )
                 es_filmwork = ESFilmworkData(
                     id=film["id"],
                     imdb_rating=film["imdb_rating"],
@@ -49,12 +50,12 @@ class DataTransform:
                     writers=film_persons["writer"][0],
                 )
                 es_objects.append(es_filmwork)
-        elif index == 'genres':
+        elif index == "genres":
             for genre in data:
                 es_genre = ESGenre(
                     id=genre["id"],
                     name=genre["name"],
-                    description=genre["description"]
+                    description=genre["description"],
                 )
                 es_objects.append(es_genre)
         else:
@@ -63,7 +64,7 @@ class DataTransform:
                     id=person["id"],
                     full_name=person["full_name"],
                     roles=person["roles"],
-                    film_ids=[film["fw_id"] for film in person["films"]]
+                    film_ids=[film["fw_id"] for film in person["films"]],
                 )
                 es_objects.append(es_person)
         return es_objects

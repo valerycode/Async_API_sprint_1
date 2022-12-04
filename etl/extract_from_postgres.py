@@ -14,7 +14,7 @@ from queries.persons import PERSON_QUERY
 INDEXES_QUERIES = {
     "movies": FILMWORKS_QUERY,
     "genres": GENRE_QUERY,
-    "persons": PERSON_QUERY
+    "persons": PERSON_QUERY,
 }
 
 logger = logging.getLogger(__name__)
@@ -42,7 +42,8 @@ class PostgresExtractor:
 
     @backoff(exceptions=(DatabaseError, ProgrammingError), logger=logger)
     def extract_data_from_pg(
-            self, date_last_modified: datetime, index: str) -> Iterator:
+        self, date_last_modified: datetime, index: str
+    ) -> Iterator:
         """Extract data from Postgres"""
         self.cursor.execute(INDEXES_QUERIES[index], (date_last_modified,))
         while rows := self.cursor.fetchmany(etl_settings.BATCH_SIZE):
