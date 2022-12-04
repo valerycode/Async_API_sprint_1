@@ -1,5 +1,6 @@
 import logging
 from http import HTTPStatus
+from typing import Union
 
 from backoff import backoff
 from config import es_settings
@@ -12,16 +13,23 @@ from elasticsearch import (
     TransportError,
 )
 from elasticsearch.helpers import bulk
-from etl.indexes.movies import MOVIES_INDEX
 
-from etl.models import ESFilmworkData
+from etl.models import ESFilmworkData, ESGenre, ESPerson
+from indexes.movies import MOVIES_INDEX_BODY
+from indexes.genres import GENRES_INDEX_BODY
+from indexes.persons import PERSONS_INDEX_BODY
 
 logger = logging.getLogger(__name__)
 
 INDEX_CREATED = (
-    "Index {name} is created." " Response from Elasticsearch: {response}."
+    "Index {name} is created. Response from Elasticsearch: {response}."
 )
 PING_MESSAGE = "Ping from Elasticsearch server: {message}."
+INDEXES_BODY = {
+    "movies": MOVIES_INDEX_BODY,
+    "genres": GENRES_INDEX_BODY,
+    "persons": PERSONS_INDEX_BODY
+}
 
 
 class ElasticsearchLoader:
@@ -39,21 +47,26 @@ class ElasticsearchLoader:
         logging.info(PING_MESSAGE.format(message=self.client.ping()))
 
     @backoff(exceptions=(RequestError,), logger=logger)
-    def create_index(self) -> None:
-        if not self.client.indices.exists(index="movies"):
+    def create_index(self, index: str) -> None:
+        if not self.client.indices.exists(index=index):
             response = self.client.indices.create(
-                index="movies",
+                index=index,
                 ignore=HTTPStatus.BAD_REQUEST.value,
-                body=MOVIES_INDEX,
+                body=INDEXES_BODY[index],
             )
             logger.debug(
-                INDEX_CREATED.format(name="movies", response=response)
+                INDEX_CREATED.format(name=index, response=response)
             )
 
     @backoff(exceptions=(SerializationError,), logger=logger)
-    def load_data_to_elastic(self, data: list[ESFilmworkData]) -> None:
+    def load_data_to_elastic(
+            self, data: list[Union[
+                ESFilmworkData,
+                ESGenre,
+                ESPerson]
+            ], index: str) -> None:
         documents = [
-            {"_index": "movies", "_id": row.id, "_source": row.dict()}
+            {"_index": index, "_id": row.id, "_source": row.dict()}
             for row in data
         ]
         bulk(self.client, documents)

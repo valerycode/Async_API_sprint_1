@@ -7,12 +7,21 @@ from backoff import backoff
 from config import etl_settings, pg_settings
 from psycopg2 import DatabaseError, OperationalError, ProgrammingError
 from psycopg2.extras import RealDictCursor
-from etl.queries.movies import FILMWORKS_QUERY
+from queries.films import FILMWORKS_QUERY
+from queries.genres import GENRE_QUERY
+from queries.persons import PERSON_QUERY
+
+INDEXES_QUERIES = {
+    "movies": FILMWORKS_QUERY,
+    "genres": GENRE_QUERY,
+    "persons": PERSON_QUERY
+}
 
 logger = logging.getLogger(__name__)
 
 CONNECT_TO_POSTGRES = "Connect to Postgres..."
 POSTGRES_CONNECTION = "Connection to Postgres succeeded."
+DATA_EXTRACTED = "Data of {objects} extracted."
 
 
 class PostgresExtractor:
@@ -32,8 +41,10 @@ class PostgresExtractor:
         logger.info(POSTGRES_CONNECTION)
 
     @backoff(exceptions=(DatabaseError, ProgrammingError), logger=logger)
-    def extract_movies(self, date_last_modified: datetime) -> Iterator:
+    def extract_data_from_pg(
+            self, date_last_modified: datetime, index: str) -> Iterator:
         """Extract data from Postgres"""
-        self.cursor.execute(FILMWORKS_QUERY, (date_last_modified,) * 3)
+        self.cursor.execute(INDEXES_QUERIES[index], (date_last_modified,))
         while rows := self.cursor.fetchmany(etl_settings.BATCH_SIZE):
+            logger.info(DATA_EXTRACTED.format(objects=index))
             yield rows

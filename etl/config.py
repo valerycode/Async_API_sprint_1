@@ -26,7 +26,7 @@ class ETLSettings(BaseSettings):
     BATCH_SIZE: int = Field(100, env="BATCH_SIZE")
     TIME_INTERVAL: int = Field(60, env="TIME_INTERVAL")
     STATE_FILE_NAME: str = Field("state.json", env="STATE_FILE_NAME")
-    LOGGING_LEVEL: str = Field(env="LOGGING_LEVEL")
+    LOGGING_LEVEL: str = Field("DEBUG", env="LOGGING_LEVEL")
     FILEMODE: str = Field(env="FILEMODE")
     FILENAME: str = Field(env="FILENAME")
 

@@ -144,3 +144,5 @@ dmypy.json
 
 .vscode/
 *.code-workspace
+etl/state.json
+etl/tests.json

@@ -1,6 +1,6 @@
-from .schema_template import TEMPLATE_INDEX_BODY
+from indexes.schema_template import TEMPLATE_INDEX_BODY
 
-PERSON_INDEX_BODY: dict = {
+PERSONS_INDEX_BODY: dict = {
     **TEMPLATE_INDEX_BODY,
     "mappings": {
         "dynamic": "strict",
@@ -11,8 +11,8 @@ PERSON_INDEX_BODY: dict = {
                 "analyzer": "ru_en",
                 "fields": {"raw": {"type": "keyword"}},
             },
-            "roles": {"type": "keyword", "analyzer": "ru_en"},
-            "film_ids": {"type": "keyword", "analyzer": "ru_en"},
+            "roles": {"type": "keyword"},
+            "film_ids": {"type": "keyword"},
         },
     },
 }
