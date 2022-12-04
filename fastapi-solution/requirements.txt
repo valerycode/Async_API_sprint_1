@@ -4,5 +4,6 @@ fastapi==0.61.1
 orjson==3.4.1
 pydantic==1.9.0
 uvicorn==0.12.2
-uvloop==0.14.0
-psycopg2==2.9.4
+uvloop==0.17.0
+psycopg2==2.9.5
+orjson==3.8.3
