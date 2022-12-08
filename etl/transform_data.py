@@ -1,9 +1,10 @@
 import logging
 from typing import Iterator, Union
 
+from pydantic import ValidationError
+
 from backoff import backoff
 from models import ESFilmworkData, ESGenre, ESPerson
-from pydantic import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -36,11 +37,23 @@ class DataTransform:
                 film_persons = self.extract_names_and_ids_by_role(
                     film["persons"]
                 )
+                genres = [
+                    ESGenre(
+                        id=genre["g_id"],
+                        name=genre["g_name"],
+                        description=genre["g_description"],
+                    )
+                    for genre in film["genres"]
+                ]
                 es_filmwork = ESFilmworkData(
                     id=film["id"],
                     imdb_rating=film["imdb_rating"],
-                    genre=film["genres"],
+                    type=film["type"],
+                    age_limit=film["age_limit"],
+                    creation_date=film["creation_date"],
+                    genres=genres,
                     title=film["title"],
+                    file_path=film["file_path"],
                     description=film["description"],
                     directors_names=film_persons["director"][1],
                     actors_names=film_persons["actor"][1],

@@ -2,22 +2,16 @@ import logging
 from http import HTTPStatus
 from typing import Union
 
+from elasticsearch import (ConnectionError, ConnectionTimeout, Elasticsearch,
+                           RequestError, SerializationError, TransportError)
+from elasticsearch.helpers import bulk
+
 from backoff import backoff
 from config import es_settings
-from elasticsearch import (
-    ConnectionError,
-    ConnectionTimeout,
-    Elasticsearch,
-    RequestError,
-    SerializationError,
-    TransportError,
-)
-from elasticsearch.helpers import bulk
 from indexes.genres import GENRES_INDEX_BODY
 from indexes.movies import MOVIES_INDEX_BODY
 from indexes.persons import PERSONS_INDEX_BODY
-
-from etl.models import ESFilmworkData, ESGenre, ESPerson
+from models import ESFilmworkData, ESGenre, ESPerson
 
 logger = logging.getLogger(__name__)
 
