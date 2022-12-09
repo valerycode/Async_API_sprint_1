@@ -7,10 +7,10 @@ services:
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
     volumes:
       - cache:/data
-    ports:
-      - '6379:6379'
     networks:
       - api_network
+    expose:
+      - 6379
     restart: always
 
   elasticsearch:
@@ -21,10 +21,10 @@ services:
     environment:
       - "discovery.type=single-node"
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    expose:
+      - 9200
     networks:
       - api_network
-    ports:
-      - "9200:9200"
     restart: always
 
   postgres_etl:
@@ -37,8 +37,6 @@ services:
       - postgres_data:/var/lib/postgresql/data/
     networks:
       - api_network
-    ports:
-      - "5432:5432"
     restart: always
 
   etl:
@@ -62,11 +60,11 @@ services:
       - .env
     networks:
       - api_network
-    ports:
-      - "8000:8000"
     depends_on:
       - redis
       - elasticsearch
+    expose:
+      - 8000
     restart: always
 
   kibana:
@@ -78,18 +76,16 @@ services:
       - api_network
     depends_on:
       - elasticsearch
-    ports:
-      - "5601:5601"
 
   nginx:
     image: nginx:1.23
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d/fastapi.conf:/etc/nginx/conf.d/fastapi.conf:ro
+      - ./nginx/configs:/etc/nginx/conf.d:ro
     depends_on:
       - fastapi
     ports:
-      - "80:80"
+      - 80:80
     restart: always
 
 networks:
