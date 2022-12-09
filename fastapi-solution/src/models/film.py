@@ -1,39 +1,26 @@
+from datetime import date
 from typing import Optional
 
-from models.genre import FilmGenre
-from models.mixin import BaseModelMixin, PaginationMixin
-from models.person import FilmPerson
 from pydantic import BaseModel
+from pydantic.fields import Field
+
+from models.genre import ESGenreBase
+from models.person import ESPersonBase
 
 
 class ESFilm(BaseModel):
-    id: str
+    uuid: str = Field(..., alias="id")
+    imdb_rating: Optional[float] = 0.0
+    type: str
+    age_limit: Optional[int] = 0
+    creation_date: Optional[date] = None
+    genres: list[ESGenreBase] = []
     title: str
+    file_path: Optional[str] = None
     description: Optional[str] = None
-    imdb_rating: Optional[float] = None
-    genre: Optional[list[str]] = None
-    director: Optional[list[str]] = None
-    actors: Optional[list[dict[str, str]]] = None
-    writers: Optional[list[dict[str, str]]] = None
-    directors: Optional[list[dict[str, str]]] = None
-
-
-class ListResponseFilm(BaseModelMixin):
-    """Schema for Film work list"""
-
-    title: str
-    imdb_rating: Optional[float] = None
-
-
-class DetailResponseFilm(ListResponseFilm):
-    """Schema for Film work detail"""
-
-    description: Optional[str] = None
-    genre: Optional[list[FilmGenre]] = []
-    actors: Optional[list[FilmPerson]] = []
-    writers: Optional[list[FilmPerson]] = []
-    directors: Optional[list[FilmPerson]] = []
-
-
-class FilmPagination(PaginationMixin):
-    films: list[ListResponseFilm] = []
+    directors_names: list[str] = []
+    actors_names: list[str] = []
+    writers_names: list[str] = []
+    directors: list[ESPersonBase] = []
+    actors: list[ESPersonBase] = []
+    writers: list[ESPersonBase] = []

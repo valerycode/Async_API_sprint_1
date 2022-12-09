@@ -3,10 +3,11 @@ from datetime import datetime
 from typing import Iterator
 
 import psycopg2
-from backoff import backoff
-from config import etl_settings, pg_settings
 from psycopg2 import DatabaseError, OperationalError, ProgrammingError
 from psycopg2.extras import RealDictCursor
+
+from backoff import backoff
+from config import etl_settings, pg_settings
 from queries.films import FILMWORKS_QUERY
 from queries.genres import GENRE_QUERY
 from queries.persons import PERSON_QUERY

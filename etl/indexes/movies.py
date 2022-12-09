@@ -7,12 +7,27 @@ MOVIES_INDEX_BODY: dict = {
         "properties": {
             "id": {"type": "keyword"},
             "imdb_rating": {"type": "float"},
-            "genres": {"type": "keyword"},
+            "type": {"type": "keyword"},
+            "age_limit": {"type": "integer"},
+            "creation_date": {
+                "type": "date",
+                "format": "yyyy-MM-dd ||YYYY-mm-dd HH:mm:ss",
+            },
+            "genres": {
+                "type": "nested",
+                "dynamic": "strict",
+                "properties": {
+                    "id": {"type": "keyword"},
+                    "name": {"type": "text", "analyzer": "ru_en"},
+                    "description": {"type": "text", "analyzer": "ru_en"},
+                },
+            },
             "title": {
                 "type": "text",
                 "analyzer": "ru_en",
                 "fields": {"raw": {"type": "keyword"}},
             },
+            "file_path": {"type": "keyword"},
             "description": {"type": "text", "analyzer": "ru_en"},
             "directors_names": {"type": "text", "analyzer": "ru_en"},
             "actors_names": {"type": "text", "analyzer": "ru_en"},

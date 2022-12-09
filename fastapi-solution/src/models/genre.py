@@ -1,23 +1,11 @@
-from models.mixin import BaseModelMixin, PaginationMixin
 from pydantic import BaseModel
+from pydantic.fields import Field
 
 
-class ElasticGenre(BaseModel):
-    id: str
+class ESGenreBase(BaseModel):
+    uuid: str = Field(..., alias="id")
     name: str
 
 
-class FilmGenre(BaseModelMixin):
-    """Schema for Film work detail"""
-
-    name: str
-
-
-class DetailResponseGenre(FilmGenre):
-    """Schema for Genre detail"""
-
-    # film_ids: Optional[list[UUID]] = []
-
-
-class GenrePagination(PaginationMixin):
-    genres: list[FilmGenre] = []
+class ESGenre(ESGenreBase):
+    description: str = None
