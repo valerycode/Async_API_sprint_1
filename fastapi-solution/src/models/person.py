@@ -1,10 +1,11 @@
 from typing import Optional
 
-from pydantic import BaseModel
 from pydantic.fields import Field
 
+from api.v1.model_mixin import BaseModelMixin
 
-class ESPersonBase(BaseModel):
+
+class ESPersonBase(BaseModelMixin):
     uuid: str = Field(..., alias="id")
     full_name: str
 

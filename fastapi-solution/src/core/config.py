@@ -1,16 +1,27 @@
 import os
 from logging import config as logging_config
 
+from pydantic import BaseSettings
+from pydantic.fields import Field
+
 from core.logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
 
-PROJECT_NAME = os.getenv("PROJECT_NAME", "movies")
-PROJECT_HOST = os.getenv("PROJECT_HOST", "127.0.0.1")
-PROJECT_PORT = int(os.getenv("PROJECT_PORT", 8000))
-REDIS_HOST = os.getenv("REDIS_HOST", "127.0.0.1")
-REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
-ELASTIC_HOST = os.getenv("ELASTIC_HOST", "127.0.0.1")
-ELASTIC_PORT = int(os.getenv("ELASTIC_PORT", 9200))
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CACHE_EXPIRE_IN_SECONDS = 60 * 5
+
+class Settings(BaseSettings):
+    project_name: str = Field(..., env="PROJECT_NAME")
+    project_host: str = Field(..., env="PROJECT_HOST")
+    project_port: str = Field(..., env="PROJECT_PORT")
+    redis_host: str = Field(..., env="REDIS_HOST")
+    redis_port: str = Field(..., env="REDIS_PORT")
+    elastic_host: str = Field(..., env="ELASTIC_HOST")
+    elastic_port: str = Field(..., env="ELASTIC_PORT")
+    base_dir: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    cache_expire_in_seconds: int = Field(..., env="CACHE_EXPIRE")
+
+    class Config:
+        env_file = '.env'
+
+
+settings = Settings()
