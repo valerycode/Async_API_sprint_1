@@ -33,7 +33,9 @@ services:
     env_file:
       - .env
     volumes:
-      - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
+      # комментарий для ревьюера: dump.sql - это резервная копия
+      # базы для загрузки данных в контейнер(перенесла в другой микросервис)
+      - ./etl/data/dump.sql:/docker-entrypoint-initdb.d/dump.sql
       - postgres_data:/var/lib/postgresql/data/
     networks:
       - api_network

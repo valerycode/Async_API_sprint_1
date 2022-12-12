@@ -32,7 +32,6 @@ async def get_genres(
     return genres
 
 
-# функция отрабатывает корректно
 @router.get(
     "/{uuid}",
     response_model=Optional[Genre],

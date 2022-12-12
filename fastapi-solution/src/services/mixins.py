@@ -2,10 +2,11 @@ from typing import Optional, Union
 
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
+from pydantic.main import BaseModel
 
 from api.v1.utils import (FilmParams, FilmSearchParams, GenreParams,
                           PersonParam, PersonSearchParam)
-from core.config import CACHE_EXPIRE_IN_SECONDS
+from core.config import settings
 from models.film import ESFilm
 from models.genre import ESGenre
 from models.person import ESPerson
@@ -14,11 +15,23 @@ Schemas: tuple = (ESFilm, ESGenre, ESPerson)
 ES_schemas = Union[Schemas]
 
 
+class CacheValue(BaseModel):
+    name: str
+    value: str
+
+
 class ServiceMixin:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch, index: str):
         self.redis = redis
         self.elastic = elastic
         self.index = index
+
+    async def _build_cache_key(self, cache_values: list[CacheValue]) -> str:
+        separate = '::'
+        key = f"{self.index}{separate}"
+        for v in cache_values:
+            key += f"{v.name}{separate}{v.value}"
+        return key
 
     async def search_in_elastic(
         self, body: dict, schema: Schemas
@@ -32,7 +45,10 @@ class ServiceMixin:
     async def get_by_id(
         self, target_id: str, schema: Schemas
     ) -> Optional[ES_schemas]:
-        instance = await self._get_result_from_cache(key=target_id)
+        cache_key = await self._build_cache_key(
+            [CacheValue(name='person_id', value=target_id)]
+        )
+        instance = await self._get_result_from_cache(key=cache_key)
         if not instance:
             instance = await self._get_data_from_elastic_by_id(
                 target_id=target_id, schema=schema
@@ -40,7 +56,7 @@ class ServiceMixin:
             if not instance:
                 return None
             await self._put_data_to_cache(
-                key=instance.uuid, instance=instance.json()
+                key=cache_key, instance=instance.json()
             )
             return instance
         return schema.parse_raw(instance)
@@ -62,7 +78,7 @@ class ServiceMixin:
         self, key: str, instance: Union[bytes, str]
     ) -> None:
         await self.redis.set(
-            key=key, value=instance, expire=CACHE_EXPIRE_IN_SECONDS
+            key=key, value=instance, expire=settings.cache_expire_in_seconds
         )
 
     def es_request_body(

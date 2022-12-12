@@ -1,14 +1,14 @@
 from datetime import date
 from typing import Optional
 
-from pydantic import BaseModel
 from pydantic.fields import Field
 
+from api.v1.model_mixin import BaseModelMixin
 from models.genre import ESGenreBase
 from models.person import ESPersonBase
 
 
-class ESFilm(BaseModel):
+class ESFilm(BaseModelMixin):
     uuid: str = Field(..., alias="id")
     imdb_rating: Optional[float] = 0.0
     type: str
