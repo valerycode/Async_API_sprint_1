@@ -11,12 +11,12 @@
 OpenAPI - http://localhost:8000/api/openapi
 
 # Технологии
-Код приложения на Python + FastAPI.
-Приложение запускается под управлением сервера ASGI(uvicorn).
-База данных - PostgresSQL.
-Хранилище – ElasticSearch.
-Кеширование данных – redis cluster.
-Все компоненты системы запускаются через docker.
+- Код приложения на Python + FastAPI.
+- Приложение запускается под управлением сервера ASGI(uvicorn).
+- База данных - PostgresSQL.
+- Хранилище – ElasticSearch.
+- Кеширование данных – redis cluster.
+- Приложение запускается через Docker compose.
 
 # Как развернуть проект
 Сделать fork проекта в свой аккаунт
@@ -60,6 +60,7 @@ POSTGRES_PASSWORD
 DB_HOST 
 DB_PORT
 DB_OPTIONS
+ELASTIC_SERVER
 ```
 
 Запуск приложения осуществляется командой:
