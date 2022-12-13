@@ -55,8 +55,8 @@ services:
       - postgres_etl
     restart: always
 
-  fastapi:
-    container_name: fastapi
+  api:
+    container_name: fastapi-container
     build: ./fastapi-solution
     env_file:
       - .env
@@ -83,9 +83,9 @@ services:
     image: nginx:1.23
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/configs:/etc/nginx/conf.d:ro
+      - ./nginx/conf.d/api.conf:/etc/nginx/conf.d/api.conf:ro
     depends_on:
-      - fastapi
+      - api
     ports:
       - 80:80
     restart: always
